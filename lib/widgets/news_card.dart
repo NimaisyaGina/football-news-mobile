@@ -2,11 +2,11 @@ import 'package:flutter/material.dart';
 // Impor ItemHomepage dari menu.dart
 import 'package:football_news/screens/menu.dart';
 // Impor halaman form
+import 'package:pbp_django_auth/pbp_django_auth.dart';
+import 'package:provider/provider.dart';
 import 'package:football_news/screens/newslist_form.dart';
 import 'package:football_news/screens/news_entry_list.dart';
 import 'package:football_news/screens/login.dart';
-import 'package:pbp_django_auth/pbp_django_auth.dart';
-import 'package:provider/provider.dart';
 
 
 class ItemCard extends StatelessWidget {
@@ -34,13 +34,13 @@ class ItemCard extends StatelessWidget {
               ),
             );
           } else if (item.name == "See Football News") {
-    Navigator.push(
-        context,
-        MaterialPageRoute(
-            builder: (context) => const NewsEntryListPage()
-        ),
-    );
-} 
+            Navigator.push(
+                context,
+                MaterialPageRoute(
+                    builder: (context) => const NewsEntryListPage()
+                ),
+            );
+        } 
 
   else if (item.name == "Logout") {
     
