@@ -1,6 +1,11 @@
 import 'package:flutter/material.dart';
 // Impor drawer [cite: 191]
 import 'package:football_news/widgets/left_drawer.dart';
+import 'dart:convert';
+import 'package:provider/provider.dart';
+import 'package:pbp_django_auth/pbp_django_auth.dart';
+import 'package:football_news/screens/menu.dart';
+
 
 class NewsFormPage extends StatefulWidget {
   const NewsFormPage({super.key});
@@ -29,6 +34,7 @@ class _NewsFormPageState extends State<NewsFormPage> {
 
   @override
   Widget build(BuildContext context) {
+    final request = context.watch<CookieRequest>();
     // [cite: 203]
     return Scaffold(
       appBar: AppBar(
@@ -165,58 +171,48 @@ class _NewsFormPageState extends State<NewsFormPage> {
                       backgroundColor:
                           MaterialStateProperty.all(Colors.indigo),
                     ),
-                    onPressed: () {
-                      if (_formKey.currentState!.validate()) {
-                        // [cite: 406]
-                        showDialog(
-                          context: context,
-                          builder: (context) {
-                            return AlertDialog(
-                              title: const Text('Berita berhasil disimpan!'), // [cite: 410]
-                              content: SingleChildScrollView(
-                                child: Column(
-                                  crossAxisAlignment:
-                                      CrossAxisAlignment.start,
-                                  children: [
-                                    Text('Judul: $_title'), // [cite: 415]
-                                    // TODO  diisi
-                                    Text('Isi: $_content'), // [cite: 416]
-                                    Text('Kategori: $_category'), // [cite: 417]
-                                    Text('Thumbnail: $_thumbnail'), // [cite: 418]
-                                    Text( // [cite: 420]
-                                        'Unggulan: ${_isFeatured ? "Ya" : "Tidak"}'),
-                                  ],
-                                ),
-                              ),
-                              actions: [
-                                TextButton(
-                                  child: const Text('OK'),
-                                  onPressed: () {
-                                    Navigator.pop(context);
-                                  },
-                                ),
-                              ],
-                            );
-                          },
-                        );
-                        _formKey.currentState!.reset(); // [cite: 435]
-                        // Reset state variables
-                        setState(() {
-                          _title = "";
-                          _content = "";
-                          _category = "update";
-                          _thumbnail = "";
-                          _isFeatured = false;
-                        });
-                      }
-                    },
-                    child: const Text(
-                      "Simpan", // [cite: 439]
-                      style: TextStyle(color: Colors.white),
-                    ),
-                  ),
+                    onPressed: () async {
+                  if (_formKey.currentState!.validate()) {
+                    // TODO: Ganti URL dengan URL aplikasi Django kamu
+                    // Jika pakai Android emulator gunakan: http://10.0.2.2:8000
+                    // Jika pakai iOS simulator atau web browser gunakan: http://localhost:8000
+                    final response = await request.postJson(
+                      "http://localhost:8000/create-flutter/",
+                      jsonEncode({
+                        "title": _title,
+                        "content": _content,
+                        "thumbnail": _thumbnail,
+                        "category": _category,
+                        "is_featured": _isFeatured,
+                      }),
+                    );
+
+                    if (!context.mounted) return;
+
+                    if (response != null && response['status'] == 'success') {
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        const SnackBar(content: Text("Product successfully saved!")),
+                      );
+                      Navigator.pushReplacement(
+                        context,
+                        MaterialPageRoute(builder: (context) => MyHomePage()),
+                      );
+                    } else {
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        const SnackBar(content: Text("Something went wrong, please try again.")),
+                      );
+                    }
+                  }
+                },
+                child: const Text(
+                  "Simpan",
+                  style: TextStyle(color: Colors.white),
                 ),
               ),
+
+              ),
+            ),
+
             ],
           ),
         ),
